@@ -1,0 +1,66 @@
+version: '3.3'
+services:
+  ss-v2ray:
+    image: 'mazy/ss-v2ray:v3.3.5-1.3.1'
+    container_name: ss-v2ray
+    restart: unless-stopped
+    networks:
+      - default
+      - traefik
+    environment:
+      - PASSWORD
+      - HOST
+    labels:
+      - traefik.enable=true
+      - 'traefik.http.routers.ss-v2ray.rule=Host(`${HOST}`)'
+      - traefik.http.routers.ss-v2ray.entrypoints=v2ray
+      - traefik.http.routers.ss-v2ray.tls.certresolver=le
+      - traefik.http.services.ss-v2ray.loadbalancer.server.port=1080   
+  ss-xray:
+    image: 'mazy/ss-xray:latest'
+    container_name: ss-xray
+    restart: unless-stopped
+    networks:
+      - default
+      - traefik
+    environment:
+      - PASSWORD
+      - HOST
+      - PLUGIN_OPTS=server;path=/tt
+    labels:
+      - traefik.enable=true
+      - 'traefik.http.routers.ss-xray.rule=Host(`${HOST}`)'
+      - traefik.http.routers.ss-xray.entrypoints=xray
+      - traefik.http.routers.ss-xray.tls.certresolver=le
+      - traefik.http.services.ss-xray.loadbalancer.server.port=1080
+  traefik:
+    image: 'traefik:v2.3'
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - '--api.insecure=true'
+      - '--entryPoints.metrics.address=:8082'
+      - '--metrics.prometheus.entryPoint=metrics'
+      - '--providers.docker=true'
+      - '--providers.docker.exposedbydefault=false'
+      - '--entrypoints.v2ray.address=:80'
+      - '--entrypoints.xray.address=:443'
+      - '--certificatesresolvers.le.acme.tlschallenge=true'
+      - '--certificatesresolvers.le.acme.email=tgo@kane.mx'
+      - '--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json'
+      - '--providers.docker.network=traefik'
+    ports:
+      - '80:80'
+      - '443:443'
+    networks:
+      - traefik
+    volumes:
+      - './letsencrypt:/letsencrypt'
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
+    extra_hosts:
+      - 'host.docker.internal:172.17.0.1'
+    labels:
+      - traefik.enable=true
+networks:
+  traefik:
+    external: true
