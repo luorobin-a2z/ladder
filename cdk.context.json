@@ -30,5 +30,41 @@
         ]
       }
     ]
+  },
+  "vpc-provider:account=237269931208:filter.isDefault=true:region=ap-southeast-1:returnAsymmetricSubnets=true": {
+    "vpcId": "vpc-054200f31894ca930",
+    "vpcCidrBlock": "172.31.0.0/16",
+    "ownerAccountId": "237269931208",
+    "availabilityZones": [],
+    "subnetGroups": [
+      {
+        "name": "Public",
+        "type": "Public",
+        "subnets": [
+          {
+            "subnetId": "subnet-0f3c05ec33a42cbbd",
+            "cidr": "172.31.16.0/20",
+            "availabilityZone": "ap-southeast-1a",
+            "routeTableId": "rtb-0f9f4239c401d1dc9"
+          },
+          {
+            "subnetId": "subnet-01733aeba9710be20",
+            "cidr": "172.31.32.0/20",
+            "availabilityZone": "ap-southeast-1b",
+            "routeTableId": "rtb-0f9f4239c401d1dc9"
+          },
+          {
+            "subnetId": "subnet-07fff8c0eb505d54a",
+            "cidr": "172.31.0.0/20",
+            "availabilityZone": "ap-southeast-1c",
+            "routeTableId": "rtb-0f9f4239c401d1dc9"
+          }
+        ]
+      }
+    ]
+  },
+  "hosted-zone:account=237269931208:domainName=dotely123.com:privateZone=false:region=ap-southeast-1": {
+    "Id": "/hostedzone/Z06046132JY6JFQ83MOHN",
+    "Name": "dotely123.com."
   }
 }

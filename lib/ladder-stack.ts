@@ -43,7 +43,7 @@ export class LadderStack extends cdk.Stack {
       bucket: asset.bucket,
       bucketKey: asset.s3ObjectKey,
     };
-    const s3Path = `s3://${params.bucket}/${params.bucketKey}`;
+    const s3Path = `s3://${params.bucket.bucketName}/${params.bucketKey}`;
     const localPath = ( params.localFile && params.localFile.length !== 0 ) ? params.localFile : `/tmp/${ params.bucketKey }`;
 
     const userData = ec2.UserData.forLinux();
@@ -51,6 +51,7 @@ export class LadderStack extends cdk.Stack {
       'set -euxo pipefail',
       `mkdir -p $(dirname '${localPath}')`,
       `aws s3 cp '${s3Path}' '${localPath}' --region ${cdk.Aws.REGION}`,
+      'TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`',
       'cat > r53-records.json << EOF',
       '{ "Changes": [ {',
       '  "Action": "UPSERT",',
@@ -59,14 +60,14 @@ export class LadderStack extends cdk.Stack {
       '  "Type": "CNAME",',
       '  "TTL": 300,',
       '  "ResourceRecords": [ {',
-      '  "Value": "`curl http://169.254.169.254/latest/meta-data/public-hostname`" }',
+      '  "Value": "`curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/public-hostname`" }',
       '  ] } ',
       '} ] }',
       'EOF',
       `aws route53 change-resource-record-sets --hosted-zone-id ${hostedZone.hostedZoneId} --change-batch file://r53-records.json`,
       'yum -y update',
       'modprobe tcp_bbr && modprobe sch_fq && sysctl -w net.ipv4.tcp_congestion_control=bbr',
-      'amazon-linux-extras install -y docker',
+      'yum install -y docker',
       'systemctl enable docker',
       'systemctl start docker',
       'curl -L "https://github.com/docker/compose/releases/download/v2.24.7/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose',
@@ -116,7 +117,7 @@ export class LadderStack extends cdk.Stack {
               new iam.PolicyStatement({
                 effect: iam.Effect.ALLOW,
                 actions: ['route53:ChangeResourceRecordSets'],
-                resources: ['hostedZone.hostedZoneArn'],
+                resources: [hostedZone.hostedZoneArn],
               }),
             ],
           }),
@@ -137,7 +138,7 @@ export class LadderStack extends cdk.Stack {
       vpc,
       launchTemplate,
       minCapacity: 1,
-      maxCapacity: 1,
+      maxCapacity: 2,
       updatePolicy: autoscaling.UpdatePolicy.rollingUpdate({
         minInstancesInService: 1,
         maxBatchSize: 1,
