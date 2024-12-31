@@ -66,5 +66,13 @@
   "hosted-zone:account=237269931208:domainName=dotely123.com:privateZone=false:region=ap-southeast-1": {
     "Id": "/hostedzone/Z06046132JY6JFQ83MOHN",
     "Name": "dotely123.com."
+  },
+  "hosted-zone:account=237269931208:domainName=dotely.net:privateZone=false:region=ap-southeast-1": {
+    "Id": "/hostedzone/Z094474828JZOTFM6D6DW",
+    "Name": "dotely.net."
+  },
+  "hosted-zone:account=237269931208:domainName=customun.com:privateZone=false:region=ap-southeast-1": {
+    "Id": "/hostedzone/Z00395803SXDC62ZKGK2Y",
+    "Name": "customun.com."
   }
 }

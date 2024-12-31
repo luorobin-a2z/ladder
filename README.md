@@ -10,8 +10,7 @@ It's an application to deploy instance on AWS provisioning shadowsocks, the ss s
 - A [public hosted zone in Route53][create-public-hosted-zone] for your domain
 - Install dependencies of app  
 ```
-yarn install --check-files --frozen-lockfile
-npx projen
+npm install
 ```
 - [Bootstrap AWS CDK environment][cdk-bootstrap](only run once for first time deployment in account and region combination)
 ```bash
@@ -20,7 +19,7 @@ npx cdk bootstrap -c hostedZoneName=<r53 hosted zone domain> -c dnsName=<subdoma
 
 ## Deploy
 ```bash
-npx cdk deploy -c servicePass=<the password> -c hostedZoneName=<r53 hosted zone domain> -c dnsName=<subdomain>
+npx cdk deploy -c servicePassword=<the password> -c hostedZoneName=<r53 hosted zone domain> -c dnsName=<subdomain>
 ```
 
 ## Client example
@@ -61,7 +60,6 @@ proxies:
 [awscli]: https://aws.amazon.com/cli/
 [create-public-hosted-zone]: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/CreatingHostedZone.html
 [cdk-bootstrap]: https://docs.aws.amazon.com/cdk/latest/guide/bootstrapping.html
-[clash]: https://github.com/Dreamacro/clash
 [free-tier]: https://aws.amazon.com/free/?all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc&awsf.Free%20Tier%20Types=*all&awsf.Free%20Tier%20Categories=*all&all-free-tier.q=ec2&all-free-tier.q_operator=AND
 [dto-free-tier]: https://aws.amazon.com/blogs/aws/aws-free-tier-data-transfer-expansion-100-gb-from-regions-and-1-tb-from-amazon-cloudfront-per-month/
 [route53-hosted-zone-price]: https://aws.amazon.com/route53/pricing/

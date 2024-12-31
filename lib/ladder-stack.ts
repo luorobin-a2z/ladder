@@ -8,9 +8,6 @@ import * as autoscaling from 'aws-cdk-lib/aws-autoscaling';
 import * as iam from 'aws-cdk-lib/aws-iam';
 
 
-
-
-
 export class LadderStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -31,7 +28,7 @@ export class LadderStack extends cdk.Stack {
       privateZone: false,
     });
     
-    const password = this.node.tryGetContext('password');
+    const password = this.node.tryGetContext('servicePassword');
     if (!password) {
       throw new Error('password must be provided');
     }
@@ -67,7 +64,10 @@ export class LadderStack extends cdk.Stack {
       `aws route53 change-resource-record-sets --hosted-zone-id ${hostedZone.hostedZoneId} --change-batch file://r53-records.json`,
       'yum -y update',
       'modprobe tcp_bbr && modprobe sch_fq && sysctl -w net.ipv4.tcp_congestion_control=bbr',
-      'yum install -y docker',
+      // 'dnf clean all',
+      // 'dnf makecache',
+      // 'dnf -y install docker',
+      'yum -y install docker',
       'systemctl enable docker',
       'systemctl start docker',
       'curl -L "https://github.com/docker/compose/releases/download/v2.24.7/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose',
@@ -104,11 +104,18 @@ export class LadderStack extends cdk.Stack {
       'Allow SSH'
     );
 
+    // Create EC2 key pair
+    const key = new ec2.KeyPair(this, 'LadderKeyPair', {
+      keyPairName: 'ladder-key-pair',
+      type: ec2.KeyPairType.RSA,
+    });
+
     const launchTemplate = new ec2.LaunchTemplate(this, 'LadderLaunchTemplate', {
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.MICRO),
       machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       userData,
       securityGroup,
+      keyPair: key, // Attach the key pair to the launch template
       role: new iam.Role(this, 'LadderLaunchTemplateRole', {
         assumedBy: new iam.ServicePrincipal('ec2.amazonaws.com'),
         inlinePolicies: {
